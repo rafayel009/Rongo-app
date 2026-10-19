@@ -1,0 +1,87 @@
+name: Build Rongo APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install packages
+        run: npm install --no-audit --no-fund
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: Make icons and splash screen
+        run: |
+          mkdir -p assets
+          cat > make-assets.js <<'JS'
+          const sharp = require('sharp');
+          const defs = '<defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6B4EFF"/><stop offset=".55" stop-color="#FF4D9D"/><stop offset="1" stop-color="#FFB020"/></linearGradient></defs>';
+          const card = '<path d="M18 11h20l11 11v28a5 5 0 0 1-5 5H18a5 5 0 0 1-5-5V16a5 5 0 0 1 5-5z" fill="#fff"/><path d="M38 11v6a5 5 0 0 0 5 5h6z" fill="#FFD84F"/><circle cx="23" cy="30" r="3.2" fill="#FF4D9D"/><rect x="30" y="28" width="14" height="4" rx="2" fill="#6B4EFF"/><circle cx="23" cy="39" r="3.2" fill="#FFB020"/><rect x="30" y="37" width="10" height="4" rx="2" fill="#12A36B"/><circle cx="23" cy="48" r="3.2" fill="#2DC4E0"/><rect x="30" y="46" width="12" height="4" rx="2" fill="#FF8A5C"/>';
+          const full = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${defs}<rect width="64" height="64" rx="16" fill="url(#lg)"/>${card}</svg>`;
+          const bg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">${defs}<rect width="64" height="64" fill="url(#lg)"/></svg>`;
+          const fg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><g transform="translate(9.6 9.6) scale(.7)">${card}</g></svg>`;
+          (async () => {
+            for (const [n, s] of [['icon-only', full], ['icon-background', bg], ['icon-foreground', fg]]) {
+              await sharp(Buffer.from(s), { density: 600 }).resize(1024, 1024).png().toFile('assets/' + n + '.png');
+            }
+            const logo = await sharp('assets/icon-only.png').resize(700, 700).toBuffer();
+            for (const [n, c] of [['splash', '#F1EDFF'], ['splash-dark', '#14102B']]) {
+              await sharp({ create: { width: 2732, height: 2732, channels: 4, background: c } }).composite([{ input: logo, gravity: 'center' }]).png().toFile('assets/' + n + '.png');
+            }
+          })();
+          JS
+          node make-assets.js
+          npx capacitor-assets generate --android --iconBackgroundColor '#6B4EFF' --splashBackgroundColor '#F1EDFF' --splashBackgroundColorDark '#14102B'
+
+      - name: Allow notifications and exact alarms
+        run: |
+          python3 - <<'PY'
+          p = 'android/app/src/main/AndroidManifest.xml'
+          s = open(p).read()
+          add = ''.join('    <uses-permission android:name="android.permission.%s" />\n' % x for x in ['POST_NOTIFICATIONS', 'USE_EXACT_ALARM', 'SCHEDULE_EXACT_ALARM', 'RECEIVE_BOOT_COMPLETED', 'VIBRATE'])
+          i = s.rfind('</manifest>')
+          open(p, 'w').write(s[:i] + add + s[i:])
+          PY
+
+      - name: Copy app into Android project
+        run: npx cap sync android
+
+      - name: Build APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Name the APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Rongo.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Rongo-apk
+          path: Rongo.apk
+
+      - name: Publish a download link
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Rongo APK ${{ github.run_number }}
+          files: Rongo.apk

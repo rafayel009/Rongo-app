@@ -1,0 +1,7 @@
+{
+  "appId": "com.rongo.app",
+  "appName": "Rongo",
+  "webDir": "www",
+  "android": { "backgroundColor": "#F1EDFF" },
+  "server": { "androidScheme": "https" }
+}

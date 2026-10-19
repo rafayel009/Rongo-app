@@ -1,0 +1,20 @@
+{
+  "name": "rongo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rongo: colorful notes, lists, tables, reminders and calendar",
+  "scripts": {
+    "sync": "cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.6.0",
+    "@capacitor/core": "^7.6.0",
+    "@capacitor/filesystem": "^7.0.0",
+    "@capacitor/local-notifications": "^7.0.0",
+    "@capacitor/share": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.6.0"
+  }
+}

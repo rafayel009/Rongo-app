@@ -24,17 +24,17 @@ calendar, clock, focus timer and priorities. Your data stays on the phone.
 - On some phones (Xiaomi, Oppo, Vivo, Samsung) also set battery use for Rongo to
   "Unrestricted" so the system does not delay reminders.
 
-## What is new in 1.1
+## What is new in 1.1.1
 
-- Reminders sound different by priority. Android keeps a separate notification channel
-  for each level (Low, Medium, High, Urgent), so you can hear the urgency. You can change
-  any of them in Android Settings > Apps > Rongo > Notifications.
+- Reminder sounds are about 5 seconds, louder, and vibrate, with a different pattern for each priority (Low, Medium, High, Urgent). Android keeps a separate channel for each level; you can change them in Android Settings > Apps > Rongo > Notifications.
 - Reminder notifications show the Rongo logo.
-- Writing no longer jumps back to the top, and the line you are typing stays on screen.
-- Lists continue automatically: `1. item` + Enter gives `2.`; Enter on an empty item ends the list. Bullets `- item` work the same way.
+- Writing no longer jumps to the top, and the line you are typing stays visible, including when the keyboard covers the bottom of the screen.
+- Numbered lists work with `1.` and `1.x`, in English and Bangla digits. Enter continues the list; Enter on an empty item ends it. Bullets `- item` work too.
+- Tap a note, checklist or table to edit it. Long press to see a floating preview with Edit, Duplicate, Archive and Delete.
 - Copy and Paste buttons above the note text.
-- Tap the Rongo logo to open a menu with Settings.
-- Tapping a note, list or table opens a clean full-page view. Use the three dots to Edit, Duplicate, Archive or Delete.
+- Tap the Rongo logo for a menu with Settings.
+- Clock and calendar use a more premium font.
+- A one-time "What is new" window shows after installing or updating.
 
 ## Change the app
 

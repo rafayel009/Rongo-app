@@ -274,6 +274,46 @@ h1.vt{font-family:var(--f-display);font-weight:800;font-size:30px;letter-spacing
 .vw-table .st td.n{text-align:right}
 .card,.agi{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 .wn{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:15px}
+/* ---------- glass morphism (v1.2) ---------- */
+:root{--glass:rgba(255,255,255,.40);--glass-strong:rgba(255,255,255,.64);--glass-line:rgba(255,255,255,.78);--glass-blur:blur(22px) saturate(175%);--glass-shadow:0 12px 34px rgba(60,35,140,.16)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--glass:rgba(44,34,92,.38);--glass-strong:rgba(50,40,104,.6);--glass-line:rgba(255,255,255,.16);--glass-shadow:0 14px 40px rgba(0,0,0,.42)}}
+:root[data-theme="dark"]{--glass:rgba(44,34,92,.38);--glass-strong:rgba(50,40,104,.6);--glass-line:rgba(255,255,255,.16);--glass-shadow:0 14px 40px rgba(0,0,0,.42)}
+body{background-attachment:fixed}
+.side{background:var(--glass);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);border:1px solid var(--glass-line);border-radius:28px;padding:18px 14px;box-shadow:var(--glass-shadow)}
+.search,.chipclock,.ib,.panel,.empty,.fchip,.sel,.cd,.tz,.pop,.sh-foot,.grid-wrap{-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+.search,.chipclock,.ib{background:var(--glass);border-color:var(--glass-line);box-shadow:var(--glass-shadow)}
+.panel{background:var(--glass);border-color:var(--glass-line);box-shadow:var(--glass-shadow)}
+.empty{background:var(--glass);border-color:var(--glass-line)}
+.fchip,.sel{background:var(--glass);border-color:var(--glass-line)}
+.fchip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.btn:not(.pri){background:var(--glass-strong);border-color:var(--glass-line);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+.cd{background:var(--glass-strong);border-color:var(--glass-line)}
+.tz{background:var(--glass-strong);border-color:var(--glass-line)}
+.card{border:1px solid rgba(255,255,255,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),inset 0 -12px 24px -18px rgba(20,8,60,.25),var(--shadow)}
+.agi{background:var(--cbg);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.6)}
+.sheet.plain{background:var(--glass-strong);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);border:1px solid var(--glass-line)}
+.sheet{box-shadow:0 30px 80px rgba(20,8,60,.45),inset 0 1px 0 rgba(255,255,255,.5)}
+.sh-foot{background:rgba(255,255,255,.28);border-top:1px solid rgba(255,255,255,.35)}
+.scrim{-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.pop{background:var(--glass-strong);border-color:var(--glass-line);box-shadow:var(--glass-shadow)}
+#toast{background:rgba(29,23,54,.78);color:#fff;-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);border:1px solid rgba(255,255,255,.2)}
+.alert{background:rgba(29,23,54,.7);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.28)}
+.pv-scrim{background:rgba(22,12,56,.3)}
+.pv-sheet{border:1px solid rgba(255,255,255,.5);box-shadow:0 30px 80px rgba(20,8,60,.5),inset 0 1px 0 rgba(255,255,255,.55)}
+.pv-actions{background:rgba(255,255,255,.28);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px)}
+.dots i{border-color:rgba(29,23,54,.3)}
+@media (max-width:760px){
+  .side{background:var(--glass-strong);border-radius:26px 26px 0 0;border-bottom:0}
+}
+/* tip */
+.tip{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-radius:20px;background:var(--glass-strong);border:1px solid var(--glass-line);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);animation:tipin .4s cubic-bezier(.2,1.2,.4,1)}
+@keyframes tipin{from{transform:translateY(-8px);opacity:0}}
+.tip .tipic{width:38px;height:38px;border-radius:14px;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);flex:none;box-shadow:0 6px 16px rgba(107,78,255,.35)}
+.tip .tx{flex:1;min-width:0;line-height:1.3}
+.tip b{display:block;font-size:14.5px}
+.tip small{opacity:.75;font-size:12.5px;font-weight:500}
+.tip .xb{flex:none}
+.wn b{font-weight:700}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head><body>
@@ -304,6 +344,7 @@ h1.vt{font-family:var(--f-display);font-weight:800;font-size:30px;letter-spacing
 <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
 <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
 <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+<symbol id="i-touch" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.5"/><circle cx="12" cy="12" r="8" opacity=".55"/></symbol>
 <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
 <symbol id="i-dots" viewBox="0 0 24 24"><path d="M12 5h.01M12 12h.01M12 19h.01"/></symbol>
 <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
@@ -388,7 +429,7 @@ function seed(){
 }
 function normalize(o){
   if(!o||!Array.isArray(o.items))return null;
-  o.settings=Object.assign({theme:'auto',weekStart:0,h24:false,tz2:'Europe/London'},o.settings||{});
+  o.settings=Object.assign({theme:'auto',weekStart:0,h24:false,tz2:'Europe/London',haptics:true},o.settings||{});
   o.items.forEach(function(it){it.labels=it.labels||[];it.list=it.list||[];if(COLORS.indexOf(it.color)<0)it.color='snow';it.priority=it.priority|0});
   o.updated=o.updated||0; return o;
 }
@@ -501,7 +542,23 @@ var TONE=[
 ];
 /* vibration patterns (ms), same as the Android channels */
 var VIB=[[0,300,200,300],[0,500,250,500,250,500],[0,600,200,600,200,600,200,600],[0,900,200,900,200,900,200,900,200,900]];
-function beep(p){
+/* Vibrate through the Android plugin; fall back to the web view only if the plugin is missing.
+   Resolves to true when the phone vibrated, or a short message saying why it did not. */
+/* light taps and confirmations; turned off in Settings > Tap vibration */
+function haptic(k){if(!S||!S.settings||S.settings.haptics===false)return;buzz(k).then(function(){},function(){})}
+function buzz(k){
+  var RC=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.RongoChannels;
+  if(RC&&RC.vibrate){
+    return RC.vibrate({level:k}).then(function(){return true},function(e){return vibrateWeb(k,(e&&e.message)||'Vibration failed')});
+  }
+  return Promise.resolve(vibrateWeb(k,'Vibration not supported in this view'));
+}
+var VIB_EXTRA={7:[0,25,60,25],8:[0,12],9:[0,30]};
+function vibrateWeb(k,fallbackMsg){
+  try{if(navigator.vibrate){return navigator.vibrate(VIB_EXTRA[k]||VIB[k])?true:fallbackMsg}}catch(e){}
+  return fallbackMsg;
+}
+function beep(p,quiet){
   try{
     var A=window.AudioContext||window.webkitAudioContext;if(!A)return;
     actx=actx||new A();if(actx.state==='suspended')actx.resume();
@@ -516,7 +573,7 @@ function beep(p){
       });
     }
   }catch(e){}
-  try{if(navigator.vibrate)navigator.vibrate(VIB[chanIdx(p)])}catch(e){}
+  if(!quiet)buzz(chanIdx(p));
 }
 function checkReminders(){
   var now=Date.now(),ch=false;
@@ -565,6 +622,8 @@ function sorter(a,b){
   if(sortBy==='due'){var x=a.remind&&!a.remind.done?a.remind.at:Infinity,y=b.remind&&!b.remind.done?b.remind.at:Infinity;return x-y||b.updated-a.updated}
   return b.updated-a.updated;
 }
+function tipDone(){try{return localStorage.getItem('rongo.tipdone')==='1'}catch(e){return true}}
+function markTipDone(){try{localStorage.setItem('rongo.tipdone','1')}catch(e){}}
 function priChip(n){return n?'<span class="chip p'+n+'">'+ic('flag')+PRI[n]+'</span>':''}
 function remChip(it){
   var r=it.remind;if(!r)return '';
@@ -610,6 +669,7 @@ function listView(mode){
   if(mode==='tables')h+='<div class="newbar"><button class="btn bn n3" data-act="new" data-t="table">'+ic('plus')+'New table</button></div>';
   if(mode==='trash'&&all.length)h+='<button class="btn danger" data-act="emptytrash">Empty trash</button>';
   h+='</div>';
+  if(mode==='notes'&&!tipDone())h+='<div class="tip" role="note"><span class="tipic">'+ic('touch')+'</span><div class="tx"><b>Long press any note to preview it</b><small>Tap to edit. Hold for about half a second.</small></div><button class="xb" data-act="tipx" aria-label="Dismiss tip">'+ic('x','sm')+'</button></div>';
   if(mode!=='trash'){
     h+='<div class="bar" role="group" aria-label="Filters"><button class="fchip" data-act="frem" aria-pressed="'+filter.rem+'">'+ic('bell','sm')+'Reminders</button>'+
       '<button class="fchip" data-act="fpri" data-p="3" aria-pressed="'+(filter.pri===3)+'">'+ic('flag','sm')+'High+</button>'+
@@ -837,6 +897,8 @@ function renderSettings(){
   '<div class="settings-row"><b>Week starts on</b><div class="row">'+seg('sset','weekStart',6,'Saturday')+seg('sset','weekStart',0,'Sunday')+seg('sset','weekStart',1,'Monday')+'</div></div>'+
   '<div class="settings-row"><b>Clock</b><div class="row"><button class="seg" data-act="sh24" data-v="0" aria-pressed="'+(!s.h24)+'">12-hour</button><button class="seg" data-act="sh24" data-v="1" aria-pressed="'+(!!s.h24)+'">24-hour</button></div></div>'+
   '<div class="settings-row"><div><b>Phone and desktop alerts</b><div class="date" style="font-size:13px">Reminders always pop up inside Rongo while it is open. Status: '+notif+'.</div></div><button class="btn sm" data-act="snotif">Allow system alerts</button></div>'+
+  '<div class="settings-row"><div><b>Test alert</b><div class="date" style="font-size:13px">Plays the Urgent sound and vibrates. Use it to check your phone works.</div></div><button class="btn sm" data-act="vtest">Test</button></div>'+
+  '<div class="settings-row"><div><b>Tap vibration</b><div class="date" style="font-size:13px">A short buzz when you press buttons, tick items or confirm.</div></div><div class="row"><button class="seg" data-act="shap" data-v="1" aria-pressed="'+(s.haptics!==false)+'">On</button><button class="seg" data-act="shap" data-v="0" aria-pressed="'+(s.haptics===false)+'">Off</button></div></div>'+
   '<div class="settings-row"><div><b>Backup</b><div class="date" style="font-size:13px">Save everything to a file, or add notes from a backup.</div></div><div class="row"><button class="btn sm" data-act="sexport" id="expbtn">'+ic('down','sm')+'Export</button><label class="btn sm" for="imp">Import</label><input type="file" id="imp" accept=".json,application/json" hidden></div></div>'+
   '<div class="settings-row"><div><b>Examples</b><div class="date" style="font-size:13px">Add the sample cards again.</div></div><button class="btn sm" data-act="sseed">Add examples</button></div>'+
   '<div class="settings-row"><div><b>Erase everything</b><div class="date" style="font-size:13px">Deletes all notes on this device and your account copy.</div></div><button class="btn sm danger" data-act="swipe" id="wipe">Erase all</button></div>'+
@@ -895,6 +957,9 @@ var A={
     ta.dispatchEvent(new Event('input',{bubbles:true}));
     toast('Pasted');
   },
+  tipx:function(){markTipDone();render()},
+  shap:function(el){S.settings.haptics=el.dataset.v==='1';save();renderSettings();if(S.settings.haptics)haptic(7)},
+  vtest:function(){beep(3,true);buzz(3).then(function(r){toast(r===true?'Phone vibrated':'Not vibrated: '+r)})},
   close:function(){closeModal()},
   /* editor */
   mpin:function(){E.it.pinned=!E.it.pinned;touch();renderEditor()},
@@ -950,6 +1015,8 @@ document.addEventListener('click',function(e){
   if(LP.fired){LP.fired=false;e.preventDefault();e.stopPropagation();return}
   if(logoOpen&&!e.target.closest('.logo-btn'))closeLogo();
   var el=e.target.closest('[data-act]');if(!el)return;
+  var HL={tick:7,toggleli:7,vtick:7,trash:7,vtrash:7,mtrash:7,purge:7,emptytrash:7,arch:7,varch:7,march:7,adone:7,asnooze:7,sseed:7,swipe:7,sexport:7,csv:7,restore:7,vtest:-1,open:-1,close:8,vclose:8};
+  var hl=HL[el.dataset.act];if(hl===undefined)hl=8;if(hl>=0)haptic(hl);
   var fn=A[el.dataset.act];if(!fn)return;
   e.stopPropagation();fn(el);
 });
@@ -1016,16 +1083,16 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('visibilitychange',function(){if(!document.hidden){checkReminders();tick()}});
 
 /* ---------- one-time window after install or update ---------- */
-var WHATS_NEW='1.1.1';
+var WHATS_NEW='1.2';
 var WN_ITEMS=[
-  'Reminders sound different by priority: a 5-second alert for each level, louder, with vibration.',
-  'Reminder notifications show the Rongo logo.',
-  'Writing stays on screen. The page no longer jumps back to the top, and the line you are typing stays visible.',
-  'Numbered lists work with "1." and "1.x", in English and Bangla digits. Enter continues the list, and Enter on an empty item ends it.',
-  'Tap a note, checklist or table to edit it. Long press to see a floating preview with Edit, Duplicate, Archive and Delete.',
-  'Copy and Paste buttons while writing.',
-  'Tap the Rongo logo for a menu with Settings.',
-  'Clock and calendar use a more premium font.'
+  'Glass look: panels, buttons, the menu bar and the preview use frosted, blurred surfaces.',
+  'A tip explains that you can long press a note to preview it. It goes away after you use it or dismiss it.',
+  'Light vibration when you press buttons and tick items, with a short confirmation buzz when you delete, archive or finish. Turn it off in Settings > Tap vibration.',
+  'Reminder sounds are about 5 seconds, louder, and vibrate with a different pattern for each priority.',
+  'Writing stays on screen, and numbered lists work with 1. and 1.x in English and Bangla.',
+  'Tap a note to edit it. Long press to see a floating preview with Edit, Duplicate, Archive and Delete.',
+  'Copy and Paste buttons while writing, and the Rongo logo menu with Settings.',
+  'A more premium font for the clock and calendar.'
 ];
 function showWhatsNew(){
   var seen=null;try{seen=localStorage.getItem('rongo.whatsnew')}catch(e){}
@@ -1108,7 +1175,7 @@ document.addEventListener('pointerdown',function(e){
   LP.fired=false;clearTimeout(LP.t);LP.t=null;
   if(!el||e.button>0||e.target.closest('[data-act]')!==el)return;
   LP.x=e.clientX;LP.y=e.clientY;
-  LP.t=setTimeout(function(){LP.t=null;LP.fired=true;if(navigator.vibrate)navigator.vibrate(30);openViewer(el.dataset.id)},450);
+  LP.t=setTimeout(function(){LP.t=null;LP.fired=true;markTipDone();haptic(9);openViewer(el.dataset.id)},450);
 });
 function lpCancel(){clearTimeout(LP.t);LP.t=null}
 document.addEventListener('pointerup',lpCancel);

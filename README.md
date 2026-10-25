@@ -24,7 +24,13 @@ calendar, clock, focus timer and priorities. Your data stays on the phone.
 - On some phones (Xiaomi, Oppo, Vivo, Samsung) also set battery use for Rongo to
   "Unrestricted" so the system does not delay reminders.
 
-## What is new in 1.1.1
+## What is new in 1.2.0
+
+- Glass look: panels, buttons, the menu bar, the search bar and the preview use frosted, blurred surfaces.
+- A tip on the Notes screen explains that you can long press a note to preview it. It hides after you use it or dismiss it.
+- Light vibration when you press buttons and tick items, and a short buzz when you delete, archive or finish. Turn it off in Settings > Tap vibration.
+
+### Earlier in 1.1.x
 
 - Reminder sounds are about 5 seconds, louder, and vibrate, with a different pattern for each priority (Low, Medium, High, Urgent). Android keeps a separate channel for each level; you can change them in Android Settings > Apps > Rongo > Notifications.
 - Reminder notifications show the Rongo logo.

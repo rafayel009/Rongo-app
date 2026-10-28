@@ -1,6 +1,6 @@
 {
   "name": "rongo",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "private": true,
   "description": "Rongo: colorful notes, lists, tables, reminders and calendar",
   "scripts": {

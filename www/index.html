@@ -470,7 +470,28 @@ function normalize(o){
   o.updated=o.updated||0; return o;
 }
 function loadLocal(){try{var r=localStorage.getItem(KEY);if(r)return normalize(JSON.parse(r))}catch(e){}return null}
+/* ---------- home-screen widget data (Android) ---------- */
+var widgetTimer=null;
+function widgetSnapshot(){
+  var open=S.items.filter(function(it){return !it.trashed&&!it.archived&&!(it.type==='list'&&it.list.length&&it.list.every(function(x){return x.done}))});
+  var o={};
+  PW.forEach(function(w){
+    var its=open.filter(function(it){return it.priority===w.p}).sort(function(a,c){
+      var x=a.remind&&!a.remind.done?a.remind.at:Infinity,y=c.remind&&!c.remind.done?c.remind.at:Infinity;return x-y||c.updated-a.updated});
+    o[String(w.p)]={n:its.length,items:its.slice(0,2).map(function(it){return {t:it.title||'Untitled',w:(it.remind&&!it.remind.done)?whenText(it.remind.at).replace(/^Today, /,''):''}})};
+  });
+  return o;
+}
+/* sends the snapshot to the Android widget; now=true sends immediately, otherwise it waits briefly so typing does not flood it */
+function syncWidget(now){
+  var RC=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.RongoChannels;
+  if(!RC||!RC.saveWidget||!S)return;
+  var go=function(){try{RC.saveWidget({data:JSON.stringify(widgetSnapshot())}).catch(function(){})}catch(e){}};
+  clearTimeout(widgetTimer);
+  if(now)go();else widgetTimer=setTimeout(go,1200);
+}
 function save(){
+  syncWidget();
   S.updated=Date.now();
   try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
   clearTimeout(saveT);saveT=setTimeout(pushDb,700);
@@ -813,7 +834,7 @@ function tick(){
   var chip=$('#chip');
   if(chip)chip.innerHTML='<b>'+esc(fmtT(now))+'</b><span>'+esc(new Intl.DateTimeFormat(undefined,{weekday:'short',day:'numeric',month:'short'}).format(now))+'</span>';
   if(view==='today'){
-    var bk=todBucket(now);if(bk!==TOD){TOD=bk;if(!E&&!MODAL&&!VIEW_ID)render()}
+    var bk=todBucket(now);if(bk!==TOD){TOD=bk;syncWidget(true);if(!E&&!MODAL&&!VIEW_ID)render()}
     var dg=$('#dig');if(dg){
       dg.textContent=new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!S.settings.h24}).format(now);
       $('#dat').textContent=new Intl.DateTimeFormat(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(now)+' · '+Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g,' ');
@@ -1143,15 +1164,12 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('visibilitychange',function(){if(!document.hidden){checkReminders();tick()}});
 
 /* ---------- one-time window after install or update ---------- */
-var WHATS_NEW='1.3';
+var WHATS_NEW='1.4';
 var WN_ITEMS=[
-  'Notes use softer, glass-like colors that show the blurred background through them.',
-  'Priority widgets on the Today screen show your Urgent, High, Medium and Low items.',
-  'Each widget changes colour with the time of day: morning, afternoon, evening and night.',
-  'Glass look for panels, buttons, menus and the preview, with light vibration on taps.',
-  'Long press any note to preview it. A tip explains this on the Notes screen.',
-  'Reminder sounds are about 5 seconds, louder, with a vibration pattern for each priority.',
-  'Numbered lists work with 1. and 1.x in English and Bangla, and the page stays put while you type.'
+  'Home-screen widget: add "Rongo priorities" to your home screen to see Urgent, High, Medium and Low at a glance.',
+  'The widget changes colour with the priority and the time of day.',
+  'Updates now install over the previous version. You no longer need to uninstall first.',
+  'Softer glass-like note colours and priority widgets on the Today screen.'
 ];
 function showWhatsNew(){
   var seen=null;try{seen=localStorage.getItem('rongo.whatsnew')}catch(e){}
@@ -1303,6 +1321,7 @@ checkReminders();
 setInterval(function(){tick();},1000);
 setInterval(checkReminders,5000);
 setTimeout(showWhatsNew,700);
+setTimeout(function(){syncWidget(true)},600);
 initDb();
 if(NATIVE)setupNative();
 })();

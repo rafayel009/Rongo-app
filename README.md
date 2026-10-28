@@ -24,6 +24,20 @@ calendar, clock, focus timer and priorities. Your data stays on the phone.
 - On some phones (Xiaomi, Oppo, Vivo, Samsung) also set battery use for Rongo to
   "Unrestricted" so the system does not delay reminders.
 
+## What is new in 1.4.0
+
+- Home-screen widget "Rongo priorities" with Urgent, High, Medium and Low tiles. Its colours follow the priority and the time of day.
+- Updates install over the previous version without uninstalling. Every build is signed with the same release key (see below).
+
+### Signing (one-time setup for the maintainer)
+The build signs the APK with a key kept in GitHub secrets: `RONGO_KEYSTORE_B64` (base64 of rongo-release.jks), `RONGO_STORE_PASSWORD` and `RONGO_KEY_PASSWORD`. Keep the keystore file safe. Losing it means future updates can't install over the app.
+
+## What is new in 1.3.0
+
+- Notes use softer, glass-like colors that show the blurred background through them.
+- Priority widgets on the Today screen show your Urgent, High, Medium and Low items, with the next items and times.
+- Each widget changes color with the time of day: morning, afternoon, evening and night.
+
 ## What is new in 1.2.0
 
 - Glass look: panels, buttons, the menu bar, the search bar and the preview use frosted, blurred surfaces.

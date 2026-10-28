@@ -18,8 +18,8 @@ img{max-width:100%}
   --danger:#D81B4A; --ok:#0E9F69;
   --p1:#12A36B; --p2:#E39A0B; --p3:#F2602A; --p4:#D81B7A;
   --shadow:0 8px 22px rgba(70,45,150,.15);
-  --c-snow:#FFFFFF; --c-coral:#FF9484; --c-sun:#FFD84F; --c-lime:#BDEB60; --c-mint:#62E3B4;
-  --c-teal:#52DADA; --c-sky:#72C9FF; --c-indigo:#A3A9FF; --c-violet:#CEA2FF; --c-pink:#FF9FD4; --c-orange:#FFB866;
+  --c-snow:rgba(255,255,255,.66); --c-coral:rgba(255,160,146,.6); --c-sun:rgba(255,222,110,.62); --c-lime:rgba(206,240,128,.6); --c-mint:rgba(128,232,196,.6);
+  --c-teal:rgba(116,224,226,.6); --c-sky:rgba(138,206,255,.6); --c-indigo:rgba(176,180,255,.6); --c-violet:rgba(214,178,255,.6); --c-pink:rgba(255,178,222,.6); --c-orange:rgba(255,198,132,.62);
   --cink:#1D1736;
   --f-display:'Bricolage Grotesque','Trebuchet MS',system-ui,sans-serif;
   --f-body:'Figtree','Noto Sans Bengali',system-ui,-apple-system,'Segoe UI',sans-serif;
@@ -286,7 +286,7 @@ body{background-attachment:fixed}
 .empty{background:var(--glass);border-color:var(--glass-line)}
 .fchip,.sel{background:var(--glass);border-color:var(--glass-line)}
 .fchip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
-.btn:not(.pri){background:var(--glass-strong);border-color:var(--glass-line);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+.btn:not(.pri):not(.bn){background:var(--glass-strong);border-color:var(--glass-line);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
 .cd{background:var(--glass-strong);border-color:var(--glass-line)}
 .tz{background:var(--glass-strong);border-color:var(--glass-line)}
 .card{border:1px solid rgba(255,255,255,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),inset 0 -12px 24px -18px rgba(20,8,60,.25),var(--shadow)}
@@ -305,6 +305,42 @@ body{background-attachment:fixed}
 @media (max-width:760px){
   .side{background:var(--glass-strong);border-radius:26px 26px 0 0;border-bottom:0}
 }
+/* notes are glass tints now */
+.card{background:linear-gradient(160deg,rgba(255,255,255,.45),rgba(255,255,255,.04) 60%),var(--cbg);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);border:1px solid rgba(255,255,255,.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 12px 30px -16px rgba(40,20,110,.38)}
+.agi{background:linear-gradient(160deg,rgba(255,255,255,.45),rgba(255,255,255,.04) 60%),var(--cbg);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+.sheet:not(.plain){-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+.pv-sheet{-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);background:linear-gradient(160deg,rgba(255,255,255,.45),rgba(255,255,255,.04) 60%),var(--cbg,var(--c-snow))}
+.sw{border:1.5px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 4px 10px -4px rgba(40,20,110,.4)}
+
+/* priority widgets: colour follows priority and the time of day */
+.pw-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:12px;margin:0 0 18px}
+.pw{--wh:350;--ws:90%;--wl:80%;--wa:.6;--wt:#1D1736;position:relative;min-width:0;border-radius:24px;padding:16px 16px 14px;color:var(--wt);background:linear-gradient(150deg,hsl(var(--wh) var(--ws) calc(var(--wl) + 8%) / var(--wa)),hsl(var(--wh) var(--ws) var(--wl) / calc(var(--wa) * .7)));border:1px solid rgba(255,255,255,.55);box-shadow:inset 0 1px 0 rgba(255,255,255,.65),0 14px 34px -18px rgba(40,20,110,.45);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);transition:background .6s ease}
+.pw[data-tod=morning]{--ws:92%;--wl:84%;--wa:.6}
+.pw[data-tod=afternoon]{--ws:86%;--wl:78%;--wa:.58}
+.pw[data-tod=evening]{--ws:72%;--wl:64%;--wa:.66}
+.pw[data-tod=night]{--ws:55%;--wl:22%;--wa:.6;--wt:#F4F1FF;border-color:rgba(255,255,255,.16)}
+.pw-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.pw-k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.78}
+.pw-n{font-family:var(--f-clock);font-weight:300;font-size:36px;line-height:1}
+.pw-tod{font-size:12px;opacity:.7;margin-top:6px}
+.pw-l{list-style:none;margin:12px 0 0;padding:0}
+.pw-l li+li{border-top:1px solid rgba(255,255,255,.32)}
+.pw-l button{width:100%;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:9px 0;border:0;background:none;color:inherit;text-align:left;font-weight:600;font-size:14px}
+.pw-l button span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pw-l time{font-family:var(--f-clock);font-size:12px;font-weight:500;opacity:.75}
+.pw-e{margin:12px 0 0;font-size:13px;opacity:.7}
+
+/* eye-catching colored buttons */
+.bn{position:relative;overflow:hidden;font-weight:800;padding:11px 18px;border:1px solid rgba(255,255,255,.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -6px 12px -8px rgba(20,8,60,.25),0 12px 26px -12px rgba(40,20,110,.55);transition:transform .15s,box-shadow .15s}
+.bn::before{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.6),rgba(255,255,255,0) 55%);pointer-events:none}
+.bn>*{position:relative}
+.bn:hover{transform:translateY(-2px);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 16px 30px -12px rgba(40,20,110,.6)}
+.bn.n1{box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 12px 26px -12px rgba(230,160,0,.75)}
+.bn.n2{box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 12px 26px -12px rgba(18,163,107,.7)}
+.bn.n3{box-shadow:inset 0 1px 0 rgba(255,255,255,.75),0 12px 26px -12px rgba(40,140,230,.7)}
+/* spacing between the header row, filters, and content */
+#main{display:flex;flex-direction:column;gap:16px;min-width:0}
+#main>.vhead{margin-bottom:0}
 /* tip */
 .tip{display:flex;align-items:center;gap:12px;padding:12px 12px 12px 14px;border-radius:20px;background:var(--glass-strong);border:1px solid var(--glass-line);box-shadow:var(--glass-shadow);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);animation:tipin .4s cubic-bezier(.2,1.2,.4,1)}
 @keyframes tipin{from{transform:translateY(-8px);opacity:0}}
@@ -708,6 +744,29 @@ function calView(){
 function agi(it){
   return '<button class="agi" data-act="open" data-id="'+it.id+'" style="--cbg:var(--c-'+it.color+')"><time>'+esc(fmtT(new Date(it.remind.at)))+'</time><b>'+esc(it.title||'Untitled')+'</b>'+priChip(it.priority)+'</button>';
 }
+/* ---------- priority widgets ---------- */
+var PW=[{p:4,name:'Urgent',h:350},{p:3,name:'High',h:25},{p:2,name:'Medium',h:265},{p:1,name:'Low',h:165}];
+var TOD=null;
+function todBucket(d){var h=d.getHours();return h>=5&&h<11?'morning':h>=11&&h<17?'afternoon':h>=17&&h<21?'evening':'night'}
+function todLabel(b){return {morning:'Morning',afternoon:'Afternoon',evening:'Evening',night:'Night'}[b]}
+function priorityWidgets(){
+  var b=todBucket(new Date());
+  var open=S.items.filter(function(it){return !it.trashed&&!it.archived&&!(it.type==='list'&&it.list.length&&it.list.every(function(x){return x.done}))});
+  return '<section class="pw-grid" aria-label="Priority widgets">'+PW.map(function(w){
+    var its=open.filter(function(it){return it.priority===w.p}).sort(function(a,c){
+      var x=a.remind&&!a.remind.done?a.remind.at:Infinity,y=c.remind&&!c.remind.done?c.remind.at:Infinity;return x-y||c.updated-a.updated});
+    var rows=its.slice(0,3).map(function(it){
+      var t=it.remind&&!it.remind.done?esc(whenText(it.remind.at).replace(/^Today, /,'')):'';
+      return '<li><button data-act="open" data-id="'+it.id+'"><span>'+esc(it.title||'Untitled')+'</span>'+(t?'<time>'+t+'</time>':'')+'</button></li>';
+    }).join('');
+    return '<article class="pw" data-tod="'+b+'" style="--wh:'+w.h+'">'+
+      '<header class="pw-h"><span class="pw-k">'+w.name+'</span><span class="pw-n">'+its.length+'</span></header>'+
+      '<div class="pw-tod">'+todLabel(b)+'</div>'+
+      (rows?'<ul class="pw-l">'+rows+'</ul>':'<p class="pw-e">Nothing '+w.name.toLowerCase()+' right now</p>')+
+    '</article>';
+  }).join('')+'</section>';
+}
+
 function todayView(){
   var now=Date.now(),t0=sod(now),act=S.items.filter(function(it){return !it.trashed&&!it.archived});
   var rem=act.filter(function(it){return it.remind&&!it.remind.done}).sort(function(a,b){return a.remind.at-b.remind.at});
@@ -716,7 +775,7 @@ function todayView(){
   var hr=new Date().getHours(),greet=hr<5?'Still up?':hr<12?'Good morning':hr<17?'Good afternoon':hr<21?'Good evening':'Good night';
   var tz=['Asia/Dhaka','UTC','Europe/London','America/New_York','America/Los_Angeles','Asia/Dubai','Asia/Kolkata','Asia/Singapore','Asia/Tokyo','Australia/Sydney'];
   if(tz.indexOf(S.settings.tz2)<0)tz.push(S.settings.tz2);
-  var h='<div class="vhead"><h1 class="vt">'+greet+'</h1></div><div class="today">';
+  var h='<div class="vhead"><h1 class="vt">'+greet+'</h1></div>'+priorityWidgets()+'<div class="today">';
   h+='<section class="panel clockbox" aria-label="Clock"><svg id="analog" viewBox="0 0 200 200" width="220" height="220" role="img" aria-label="Analog clock"><circle cx="100" cy="100" r="94" fill="var(--panel-solid)" stroke="var(--line)" stroke-width="2"/>';
   for(var i=0;i<12;i++){var a=i*30*Math.PI/180,r1=i%3===0?78:84;h+='<line x1="'+(100+Math.sin(a)*r1).toFixed(1)+'" y1="'+(100-Math.cos(a)*r1).toFixed(1)+'" x2="'+(100+Math.sin(a)*90).toFixed(1)+'" y2="'+(100-Math.cos(a)*90).toFixed(1)+'" stroke="'+(i%3===0?'var(--accent)':'var(--muted)')+'" stroke-width="'+(i%3===0?4:2)+'" stroke-linecap="round"/>'}
   h+='<line id="hh" x1="100" y1="100" x2="100" y2="58" stroke="var(--ink)" stroke-width="6" stroke-linecap="round"/><line id="mh" x1="100" y1="100" x2="100" y2="36" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><line id="sh" x1="100" y1="112" x2="100" y2="28" stroke="var(--p4)" stroke-width="2" stroke-linecap="round"/><circle cx="100" cy="100" r="5" fill="var(--p4)"/></svg>';
@@ -754,6 +813,7 @@ function tick(){
   var chip=$('#chip');
   if(chip)chip.innerHTML='<b>'+esc(fmtT(now))+'</b><span>'+esc(new Intl.DateTimeFormat(undefined,{weekday:'short',day:'numeric',month:'short'}).format(now))+'</span>';
   if(view==='today'){
+    var bk=todBucket(now);if(bk!==TOD){TOD=bk;if(!E&&!MODAL&&!VIEW_ID)render()}
     var dg=$('#dig');if(dg){
       dg.textContent=new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:!S.settings.h24}).format(now);
       $('#dat').textContent=new Intl.DateTimeFormat(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(now)+' · '+Intl.DateTimeFormat().resolvedOptions().timeZone.replace(/_/g,' ');
@@ -1083,16 +1143,15 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('visibilitychange',function(){if(!document.hidden){checkReminders();tick()}});
 
 /* ---------- one-time window after install or update ---------- */
-var WHATS_NEW='1.2';
+var WHATS_NEW='1.3';
 var WN_ITEMS=[
-  'Glass look: panels, buttons, the menu bar and the preview use frosted, blurred surfaces.',
-  'A tip explains that you can long press a note to preview it. It goes away after you use it or dismiss it.',
-  'Light vibration when you press buttons and tick items, with a short confirmation buzz when you delete, archive or finish. Turn it off in Settings > Tap vibration.',
-  'Reminder sounds are about 5 seconds, louder, and vibrate with a different pattern for each priority.',
-  'Writing stays on screen, and numbered lists work with 1. and 1.x in English and Bangla.',
-  'Tap a note to edit it. Long press to see a floating preview with Edit, Duplicate, Archive and Delete.',
-  'Copy and Paste buttons while writing, and the Rongo logo menu with Settings.',
-  'A more premium font for the clock and calendar.'
+  'Notes use softer, glass-like colors that show the blurred background through them.',
+  'Priority widgets on the Today screen show your Urgent, High, Medium and Low items.',
+  'Each widget changes colour with the time of day: morning, afternoon, evening and night.',
+  'Glass look for panels, buttons, menus and the preview, with light vibration on taps.',
+  'Long press any note to preview it. A tip explains this on the Notes screen.',
+  'Reminder sounds are about 5 seconds, louder, with a vibration pattern for each priority.',
+  'Numbered lists work with 1. and 1.x in English and Bangla, and the page stays put while you type.'
 ];
 function showWhatsNew(){
   var seen=null;try{seen=localStorage.getItem('rongo.whatsnew')}catch(e){}

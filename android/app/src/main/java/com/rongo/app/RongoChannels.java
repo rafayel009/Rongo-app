@@ -32,6 +32,16 @@ public class RongoChannels extends Plugin {
             {0, 900, 200, 900, 200, 900, 200, 900, 200, 900}
     };
 
+    /** Saves the home-screen widget snapshot and refreshes the widget. */
+    @PluginMethod
+    public void saveWidget(PluginCall call) {
+        String data = call.getString("data", "{}");
+        getContext().getSharedPreferences(RongoWidgetProvider.PREFS, Context.MODE_PRIVATE)
+                .edit().putString("data", data).apply();
+        RongoWidgetProvider.refreshAll(getContext());
+        call.resolve();
+    }
+
     /** Vibrates the phone directly, so it works even when the web view blocks navigator.vibrate. */
     @PluginMethod
     public void vibrate(PluginCall call) {

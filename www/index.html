@@ -330,6 +330,17 @@ body{background-attachment:fixed}
 .pw-l time{font-family:var(--f-clock);font-size:12px;font-weight:500;opacity:.75}
 .pw-e{margin:12px 0 0;font-size:13px;opacity:.7}
 
+/* navigation: Notes in the middle and noticeable, Settings beside it */
+.nv-set{display:none}
+.nv[data-v=notes]{font-weight:800}
+@media (max-width:760px){
+  .nv-set{display:flex}
+  .nv[data-v=tables]{order:1}.nv[data-v=calendar]{order:2}.nv[data-v=notes]{order:3}.nv-set{order:4}.nv[data-v=today]{order:5}
+  .nv[data-v=notes]{flex:1.3;padding:9px 4px;border-radius:20px;color:#fff;background:linear-gradient(155deg,#9785ff 0%,#6B4EFF 52%,#4a2fe0 100%);box-shadow:0 14px 28px -10px rgba(107,78,255,.75),inset 0 1px 0 rgba(255,255,255,.45);transform:translateY(-10px)}
+  .nv[data-v=notes] svg{width:24px;height:24px}
+  .nv[data-v=notes] span{font-size:12px}
+  .nv[data-v=notes][aria-current="page"]{background:linear-gradient(155deg,#9785ff 0%,#6B4EFF 52%,#4a2fe0 100%)}
+}
 /* eye-catching colored buttons */
 .bn{position:relative;overflow:hidden;font-weight:800;padding:11px 18px;border:1px solid rgba(255,255,255,.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -6px 12px -8px rgba(20,8,60,.25),0 12px 26px -12px rgba(40,20,110,.55);transition:transform .15s,box-shadow .15s}
 .bn::before{content:"";position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.6),rgba(255,255,255,0) 55%);pointer-events:none}
@@ -470,25 +481,30 @@ function normalize(o){
   o.updated=o.updated||0; return o;
 }
 function loadLocal(){try{var r=localStorage.getItem(KEY);if(r)return normalize(JSON.parse(r))}catch(e){}return null}
-/* ---------- home-screen widget data (Android) ---------- */
+/* ---------- home-screen widgets (Android): all notes are sent, each widget shows the one you choose ---------- */
 var widgetTimer=null;
-function widgetSnapshot(){
-  var open=S.items.filter(function(it){return !it.trashed&&!it.archived&&!(it.type==='list'&&it.list.length&&it.list.every(function(x){return x.done}))});
-  var o={};
-  PW.forEach(function(w){
-    var its=open.filter(function(it){return it.priority===w.p}).sort(function(a,c){
-      var x=a.remind&&!a.remind.done?a.remind.at:Infinity,y=c.remind&&!c.remind.done?c.remind.at:Infinity;return x-y||c.updated-a.updated});
-    o[String(w.p)]={n:its.length,items:its.slice(0,2).map(function(it){return {t:it.title||'Untitled',w:(it.remind&&!it.remind.done)?whenText(it.remind.at).replace(/^Today, /,''):''}})};
-  });
-  return o;
+function widgetPreview(it){
+  if(it.type==='list'){var d=it.list.filter(function(x){return x.done}).length;return d+' of '+it.list.length+' done'+(it.list.length?' · '+it.list.slice(0,3).map(function(x){return x.t}).join(', '):'')}
+  if(it.type==='table'){return it.table.rows.length+' × '+(it.table.rows[0]?it.table.rows[0].length:0)+' table'}
+  return (it.body||'').replace(/\s+/g,' ').trim().slice(0,180);
 }
-/* sends the snapshot to the Android widget; now=true sends immediately, otherwise it waits briefly so typing does not flood it */
+function widgetNotes(){
+  return S.items.filter(function(it){return !it.trashed}).map(function(it){
+    return {id:it.id,t:it.title||'Untitled',p:widgetPreview(it),c:it.color||'snow',k:it.type,pr:it.priority|0,w:(it.remind&&!it.remind.done)?whenText(it.remind.at).replace(/^Today, /,''):'',a:it.archived?1:0};
+  });
+}
+function nativeRC(){return window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.RongoChannels}
+/* sends the note list to the Android widgets; now=true sends at once, otherwise after a short pause so typing does not flood it */
 function syncWidget(now){
-  var RC=window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.RongoChannels;
-  if(!RC||!RC.saveWidget||!S)return;
-  var go=function(){try{RC.saveWidget({data:JSON.stringify(widgetSnapshot())}).catch(function(){})}catch(e){}};
+  var RC=nativeRC();if(!RC||!RC.saveWidget||!S)return;
+  var go=function(){try{RC.saveWidget({notes:JSON.stringify(widgetNotes())}).catch(function(){})}catch(e){}};
   clearTimeout(widgetTimer);
   if(now)go();else widgetTimer=setTimeout(go,1200);
+}
+/* a tap on a widget asks the app to open that note */
+function checkPendingOpen(){
+  var RC=nativeRC();if(!RC||!RC.takePendingOpen||!S)return;
+  try{RC.takePendingOpen().then(function(r){if(r&&r.id){var it=byId(r.id);if(it)openEditor(it,false)}}).catch(function(){})}catch(e){}
 }
 function save(){
   syncWidget();
@@ -817,8 +833,9 @@ function agiFull(it){
 }
 function renderNav(){
   var tr=S.items.filter(function(i){return i.trashed}).length;
-  var tabs=[['notes','Notes','notes'],['tables','Tables','table'],['calendar','Calendar','cal'],['today','Today','clock'],['archive','Archive','archive'],['trash','Trash','trash']];
-  $('#nav').innerHTML=tabs.map(function(t){return '<button class="nv" data-act="nav" data-v="'+t[0]+'"'+(view===t[0]?' aria-current="page"':'')+'>'+ic(t[2])+'<span>'+t[1]+'</span>'+(t[0]==='trash'&&tr?'<span class="badge">'+tr+'</span>':'')+'</button>'}).join('');
+  var tabs=[['notes','Notes','notes'],['tables','Tables','table'],['calendar','Calendar','cal'],['today','Today','clock']];
+  $('#nav').innerHTML=tabs.map(function(t){return '<button class="nv" data-act="nav" data-v="'+t[0]+'"'+(view===t[0]?' aria-current="page"':'')+'>'+ic(t[2])+'<span>'+t[1]+'</span></button>'}).join('')+
+    '<button class="nv nv-set" data-act="settings" aria-label="Settings">'+ic('gear')+'<span>Settings</span></button>';
 }
 function render(){
   renderNav();
@@ -980,7 +997,9 @@ function renderSettings(){
   '<div class="settings-row"><div><b>Phone and desktop alerts</b><div class="date" style="font-size:13px">Reminders always pop up inside Rongo while it is open. Status: '+notif+'.</div></div><button class="btn sm" data-act="snotif">Allow system alerts</button></div>'+
   '<div class="settings-row"><div><b>Test alert</b><div class="date" style="font-size:13px">Plays the Urgent sound and vibrates. Use it to check your phone works.</div></div><button class="btn sm" data-act="vtest">Test</button></div>'+
   '<div class="settings-row"><div><b>Tap vibration</b><div class="date" style="font-size:13px">A short buzz when you press buttons, tick items or confirm.</div></div><div class="row"><button class="seg" data-act="shap" data-v="1" aria-pressed="'+(s.haptics!==false)+'">On</button><button class="seg" data-act="shap" data-v="0" aria-pressed="'+(s.haptics===false)+'">Off</button></div></div>'+
-  '<div class="settings-row"><div><b>Backup</b><div class="date" style="font-size:13px">Save everything to a file, or add notes from a backup.</div></div><div class="row"><button class="btn sm" data-act="sexport" id="expbtn">'+ic('down','sm')+'Export</button><label class="btn sm" for="imp">Import</label><input type="file" id="imp" accept=".json,application/json" hidden></div></div>'+
+  '<div class="settings-row"><div><b>Archive and trash</b><div class="date" style="font-size:13px">Notes you archived or deleted.</div></div><div class="row"><button class="btn sm" data-act="sgo" data-v="archive">Archive</button><button class="btn sm" data-act="sgo" data-v="trash">Trash'+(S.items.filter(function(i){return i.trashed}).length?' ('+S.items.filter(function(i){return i.trashed}).length+')':'')+'</button></div></div>'+
+  '<div class="settings-row"><div><b>Home-screen widgets</b><div class="date" style="font-size:13px">Long-press your home screen, choose Rongo, then pick a note and a look. Add more widgets for more notes.</div></div></div>'+
+  '<div class="settings-row"><b>Backup</b><div class="date" style="font-size:13px">Save everything to a file, or add notes from a backup.</div></div><div class="row"><button class="btn sm" data-act="sexport" id="expbtn">'+ic('down','sm')+'Export</button><label class="btn sm" for="imp">Import</label><input type="file" id="imp" accept=".json,application/json" hidden></div></div>'+
   '<div class="settings-row"><div><b>Examples</b><div class="date" style="font-size:13px">Add the sample cards again.</div></div><button class="btn sm" data-act="sseed">Add examples</button></div>'+
   '<div class="settings-row"><div><b>Erase everything</b><div class="date" style="font-size:13px">Deletes all notes on this device and your account copy.</div></div><button class="btn sm danger" data-act="swipe" id="wipe">Erase all</button></div>'+
   '</div></div>';
@@ -990,6 +1009,7 @@ function renderSettings(){
 function openById(id){var it=byId(id);if(it)openEditor(it,false)}
 var A={
   nav:function(el){view=el.dataset.v;$('#q').value=filter.q;render();window.scrollTo(0,0)},
+  sgo:function(el){closeModal();view=el.dataset.v;$('#q').value=filter.q;render();window.scrollTo(0,0)},
   theme:function(){var o=['auto','light','dark'];S.settings.theme=o[(o.indexOf(S.settings.theme)+1)%3];applyTheme();save();toast('Theme: '+S.settings.theme)},
   settings:function(){openSettings()},
   new:function(el){openEditor(newItem(el.dataset.t),true)},
@@ -1161,15 +1181,15 @@ document.addEventListener('keydown',function(e){
   if(e.key==='/'){e.preventDefault();$('#q').focus()}
   else if(e.key==='n'||e.key==='N'){e.preventDefault();openEditor(newItem('note'),true)}
 });
-document.addEventListener('visibilitychange',function(){if(!document.hidden){checkReminders();tick()}});
+document.addEventListener('visibilitychange',function(){if(!document.hidden){checkReminders();tick();checkPendingOpen()}});
 
 /* ---------- one-time window after install or update ---------- */
-var WHATS_NEW='1.4';
+var WHATS_NEW='1.5';
 var WN_ITEMS=[
-  'Home-screen widget: add "Rongo priorities" to your home screen to see Urgent, High, Medium and Low at a glance.',
-  'The widget changes colour with the priority and the time of day.',
-  'Updates now install over the previous version. You no longer need to uninstall first.',
-  'Softer glass-like note colours and priority widgets on the Today screen.'
+  'Home-screen widgets now show the note you choose. Add a widget, pick a note and a look: Glass, Night, Priority or Minimal.',
+  'Add as many widgets as you like. Each one can show a different note, and you can change the look any time.',
+  'Notes is now in the middle of the bottom bar, with Settings beside it.',
+  'Archive and Trash moved into Settings.'
 ];
 function showWhatsNew(){
   var seen=null;try{seen=localStorage.getItem('rongo.whatsnew')}catch(e){}
@@ -1321,7 +1341,7 @@ checkReminders();
 setInterval(function(){tick();},1000);
 setInterval(checkReminders,5000);
 setTimeout(showWhatsNew,700);
-setTimeout(function(){syncWidget(true)},600);
+setTimeout(function(){syncWidget(true);checkPendingOpen()},600);
 initDb();
 if(NATIVE)setupNative();
 })();

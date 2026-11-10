@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
@@ -32,14 +33,25 @@ public class RongoChannels extends Plugin {
             {0, 900, 200, 900, 200, 900, 200, 900, 200, 900}
     };
 
-    /** Saves the home-screen widget snapshot and refreshes the widget. */
+    /** Saves the note list for the home-screen widgets and refreshes them. */
     @PluginMethod
     public void saveWidget(PluginCall call) {
-        String data = call.getString("data", "{}");
+        String notes = call.getString("notes", "[]");
         getContext().getSharedPreferences(RongoWidgetProvider.PREFS, Context.MODE_PRIVATE)
-                .edit().putString("data", data).apply();
+                .edit().putString(RongoWidgetProvider.KEY_NOTES, notes).apply();
         RongoWidgetProvider.refreshAll(getContext());
         call.resolve();
+    }
+
+    /** Returns the note a widget asked to open (once), so the web app can show it. */
+    @PluginMethod
+    public void takePendingOpen(PluginCall call) {
+        android.content.SharedPreferences sp = getContext().getSharedPreferences(RongoWidgetProvider.PREFS, Context.MODE_PRIVATE);
+        String id = sp.getString("pendingOpen", null);
+        if (id != null) sp.edit().remove("pendingOpen").apply();
+        JSObject out = new JSObject();
+        if (id != null) out.put("id", id);
+        call.resolve(out);
     }
 
     /** Vibrates the phone directly, so it works even when the web view blocks navigator.vibrate. */

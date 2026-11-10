@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One note on the home screen. Filled in by RongoWidgetProvider. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="14dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <View
+                android:id="@+id/w_accent"
+                android:layout_width="4dp"
+                android:layout_height="14dp" />
+            <TextView
+                android:id="@+id/w_kind"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingStart="8dp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textSize="10sp"
+                android:textStyle="bold" />
+            <TextView
+                android:id="@+id/w_when"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textSize="10sp" />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/w_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:fontFamily="sans-serif-medium"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:textSize="16sp" />
+        <TextView
+            android:id="@+id/w_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="4dp"
+            android:maxLines="4"
+            android:ellipsize="end"
+            android:textSize="12sp" />
+    </LinearLayout>
+</FrameLayout>

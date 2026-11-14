@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -17,13 +16,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Setup screen shown when a Rongo widget is added (and when it is reconfigured). */
+/**
+ * Widget settings. A new widget never shows this screen: it fills in automatically.
+ * Long-press a widget (Android 12+) to pin it to one note, or return to automatic.
+ */
 public class WidgetConfigActivity extends Activity {
 
     private int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    private String look = "glass";
     private final List<String> noteIds = new ArrayList<>();
-    private Button[] lookButtons;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -39,37 +39,27 @@ public class WidgetConfigActivity extends Activity {
             return;
         }
 
-        String cfg = RongoWidgetProvider.prefs(this).getString("w" + widgetId, null);
-        if (cfg != null && cfg.contains("|")) look = cfg.substring(cfg.lastIndexOf('|') + 1);
+        // first time: no screen, the widget simply starts in automatic mode
+        if (RongoWidgetProvider.prefs(this).getString("w" + widgetId, null) == null) {
+            choose("auto");
+            return;
+        }
 
         setContentView(R.layout.activity_widget_config);
 
-        lookButtons = new Button[]{
-                findViewById(R.id.s_glass), findViewById(R.id.s_night),
-                findViewById(R.id.s_priority), findViewById(R.id.s_minimal)
-        };
-        for (int i = 0; i < lookButtons.length; i++) {
-            final String name = RongoWidgetProvider.STYLES[i];
-            lookButtons[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    look = name;
-                    highlightLook();
-                }
-            });
-        }
-        highlightLook();
-
         List<String> titles = new ArrayList<>();
+        titles.add("Automatic (most important note for this widget)");
+        noteIds.add("auto");
         try {
-            JSONArray arr = new JSONArray(RongoWidgetProvider.prefs(this)
-                    .getString(RongoWidgetProvider.KEY_NOTES, "[]"));
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject o = arr.optJSONObject(i);
-                if (o == null) continue;
-                String when = o.optString("w", "");
-                noteIds.add(o.optString("id"));
-                titles.add(o.optString("t", "Untitled") + (when.isEmpty() ? "" : "   ·   " + when));
+            JSONArray arr = RongoWidgetProvider.notes(this);
+            if (arr != null) {
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject o = arr.optJSONObject(i);
+                    if (o == null) continue;
+                    String when = o.optString("w", "");
+                    noteIds.add(o.optString("id"));
+                    titles.add(o.optString("t", "Untitled") + (when.isEmpty() ? "" : "   ·   " + when));
+                }
             }
         } catch (Exception e) {
             // nothing saved yet
@@ -77,7 +67,7 @@ public class WidgetConfigActivity extends Activity {
 
         ListView list = findViewById(R.id.note_list);
         TextView empty = findViewById(R.id.empty);
-        if (titles.isEmpty()) {
+        if (noteIds.size() <= 1) {
             empty.setVisibility(View.VISIBLE);
         }
         list.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, titles));
@@ -89,14 +79,8 @@ public class WidgetConfigActivity extends Activity {
         });
     }
 
-    private void highlightLook() {
-        for (int i = 0; i < lookButtons.length; i++) {
-            lookButtons[i].setAlpha(RongoWidgetProvider.STYLES[i].equals(look) ? 1f : 0.5f);
-        }
-    }
-
-    private void choose(String noteId) {
-        RongoWidgetProvider.prefs(this).edit().putString("w" + widgetId, noteId + "|" + look).apply();
+    private void choose(String noteIdOrAuto) {
+        RongoWidgetProvider.prefs(this).edit().putString("w" + widgetId, noteIdOrAuto).apply();
         RongoWidgetProvider.render(this, AppWidgetManager.getInstance(this), widgetId);
         Intent result = new Intent();
         result.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);

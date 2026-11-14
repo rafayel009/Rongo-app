@@ -33,12 +33,14 @@ public class RongoChannels extends Plugin {
             {0, 900, 200, 900, 200, 900, 200, 900, 200, 900}
     };
 
-    /** Saves the note list for the home-screen widgets and refreshes them. */
+    /** Saves the note list and look for the home-screen widgets, then refreshes them. */
     @PluginMethod
     public void saveWidget(PluginCall call) {
         String notes = call.getString("notes", "[]");
+        String look = call.getString("look", "glass");
         getContext().getSharedPreferences(RongoWidgetProvider.PREFS, Context.MODE_PRIVATE)
-                .edit().putString(RongoWidgetProvider.KEY_NOTES, notes).apply();
+                .edit().putString(RongoWidgetProvider.KEY_NOTES, notes)
+                .putString(RongoWidgetProvider.KEY_LOOK, look).apply();
         RongoWidgetProvider.refreshAll(getContext());
         call.resolve();
     }

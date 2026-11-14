@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose a note"
+        android:text="Widget settings"
         android:fontFamily="sans-serif-medium"
         android:textColor="#1D1736"
         android:textSize="24sp" />
@@ -16,18 +16,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="14dp"
-        android:text="Pick a look, then tap a note."
+        android:text="Pick a note to pin to this widget, or leave it automatic."
         android:textColor="#6C6684"
         android:textSize="13sp" />
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Button android:id="@+id/s_glass" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Glass" android:textSize="12sp" android:textAllCaps="false" android:backgroundTint="#B9A8FF" android:textColor="#1D1736" />
-        <Button android:id="@+id/s_night" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Night" android:textSize="12sp" android:textAllCaps="false" android:backgroundTint="#2A2150" android:textColor="#F4F1FF" />
-        <Button android:id="@+id/s_priority" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Priority" android:textSize="12sp" android:textAllCaps="false" android:backgroundTint="#FFB2D6" android:textColor="#1D1736" />
-        <Button android:id="@+id/s_minimal" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Minimal" android:textSize="12sp" android:textAllCaps="false" android:backgroundTint="#EFEBFF" android:textColor="#1D1736" />
-    </LinearLayout>
     <TextView
         android:id="@+id/empty"
         android:layout_width="match_parent"

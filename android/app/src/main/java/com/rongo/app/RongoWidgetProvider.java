@@ -13,18 +13,21 @@ import android.widget.RemoteViews;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Calendar;
 
 /**
- * Home-screen note widget. Each widget shows the note chosen in WidgetConfigActivity.
- * Stored choice per widget: prefs "w<widgetId>" = "<noteId>|<look>".
- * The app keeps the note list in prefs "notes" (see RongoChannels.saveWidget).
+ * Home-screen note widget. Fills in automatically:
+ * - Each widget shows the note at its position in the list the app sends (1st widget = top note,
+ *   2nd widget = next note, and so on). The list updates whenever notes change.
+ * - Optional: a widget can be pinned to one specific note from its settings (prefs "w<id>" = note id).
+ * The app saves the list in prefs "notes" and the look in prefs "look" (see RongoChannels.saveWidget).
  */
 public class RongoWidgetProvider extends AppWidgetProvider {
 
     static final String PREFS = "rongo_widget";
     static final String KEY_NOTES = "notes";
-    static final String[] STYLES = {"glass", "night", "priority", "minimal"};
+    static final String KEY_LOOK = "look";
     static final String[] TIMES = {"morning", "afternoon", "evening", "night"};
 
     @Override
@@ -43,7 +46,7 @@ public class RongoWidgetProvider extends AppWidgetProvider {
         return ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
     }
 
-    /** Called by the app whenever its notes change. */
+    /** Called by the app whenever its notes or look change. */
     static void refreshAll(Context ctx) {
         AppWidgetManager mgr = AppWidgetManager.getInstance(ctx);
         int[] ids = mgr.getAppWidgetIds(new ComponentName(ctx, RongoWidgetProvider.class));
@@ -58,15 +61,29 @@ public class RongoWidgetProvider extends AppWidgetProvider {
         return 3;
     }
 
-    static JSONObject findNote(Context ctx, String id) {
+    /** Position of this widget among all Rongo widgets, 0 for the first one. */
+    static int position(AppWidgetManager mgr, Context ctx, int widgetId) {
+        int[] ids = mgr.getAppWidgetIds(new ComponentName(ctx, RongoWidgetProvider.class)).clone();
+        Arrays.sort(ids);
+        for (int i = 0; i < ids.length; i++) {
+            if (ids[i] == widgetId) return i;
+        }
+        return 0;
+    }
+
+    static JSONArray notes(Context ctx) {
         try {
-            JSONArray arr = new JSONArray(prefs(ctx).getString(KEY_NOTES, "[]"));
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject o = arr.optJSONObject(i);
-                if (o != null && id.equals(o.optString("id"))) return o;
-            }
+            return new JSONArray(prefs(ctx).getString(KEY_NOTES, "[]"));
         } catch (Exception e) {
-            // no notes saved yet
+            return null;
+        }
+    }
+
+    static JSONObject byId(JSONArray arr, String id) {
+        if (arr == null) return null;
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject o = arr.optJSONObject(i);
+            if (o != null && id.equals(o.optString("id"))) return o;
         }
         return null;
     }
@@ -108,35 +125,21 @@ public class RongoWidgetProvider extends AppWidgetProvider {
     static void render(Context ctx, AppWidgetManager mgr, int widgetId) {
         String pkg = ctx.getPackageName();
         RemoteViews v = new RemoteViews(pkg, R.layout.widget_note);
-        String cfg = prefs(ctx).getString("w" + widgetId, null);
-
-        String noteId = null, look = "glass";
-        if (cfg != null && cfg.contains("|")) {
-            int bar = cfg.lastIndexOf('|');
-            noteId = cfg.substring(0, bar);
-            look = cfg.substring(bar + 1);
-        }
-
-        if (noteId == null) {
-            // not set up yet: tapping the widget opens the setup screen
-            v.setInt(R.id.w_root, "setBackgroundResource", res(ctx, "note_glass_snow", "note_glass_snow"));
-            v.setTextViewText(R.id.w_kind, "RONGO");
-            v.setTextViewText(R.id.w_when, "");
-            v.setTextViewText(R.id.w_title, "Choose a note");
-            v.setTextViewText(R.id.w_preview, "Tap here to pick the note to show.");
-            v.setInt(R.id.w_accent, "setBackgroundColor", Color.parseColor("#8E86C8"));
-            Intent setup = new Intent(ctx, WidgetConfigActivity.class);
-            setup.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
-            setup.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            v.setOnClickPendingIntent(R.id.w_root, PendingIntent.getActivity(ctx, widgetId, setup,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-            setTextColors(v, 0xFF1D1736);
-            mgr.updateAppWidget(widgetId, v);
-            return;
-        }
-
-        JSONObject n = findNote(ctx, noteId);
+        String look = prefs(ctx).getString(KEY_LOOK, "glass");
+        String pinned = prefs(ctx).getString("w" + widgetId, null);
+        JSONArray list = notes(ctx);
         int t = timeIndex();
+
+        JSONObject n = null;
+        if (list != null) {
+            if (pinned != null && !pinned.equals("auto")) {
+                n = byId(list, pinned);
+            } else {
+                int idx = position(mgr, ctx, widgetId);
+                n = (idx < list.length()) ? list.optJSONObject(idx) : null;
+            }
+        }
+
         String colour = (n == null) ? "snow" : n.optString("c", "snow");
         int pr = (n == null) ? 0 : n.optInt("pr", 0);
 
@@ -161,35 +164,36 @@ public class RongoWidgetProvider extends AppWidgetProvider {
         }
         v.setInt(R.id.w_root, "setBackgroundResource", res(ctx, bg, "note_glass_snow"));
         v.setInt(R.id.w_accent, "setBackgroundColor", Color.parseColor(accent(colour)));
-
         int text = dark ? 0xFFF4F1FF : 0xFF1D1736;
-        setTextColors(v, text);
+        v.setTextColor(R.id.w_kind, text);
+        v.setTextColor(R.id.w_when, text);
+        v.setTextColor(R.id.w_title, text);
+        v.setTextColor(R.id.w_preview, text);
 
+        Intent open = new Intent(ctx, MainActivity.class);
+        open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         if (n == null) {
-            v.setTextViewText(R.id.w_kind, "NOTE");
-            v.setTextViewText(R.id.w_when, "");
-            v.setTextViewText(R.id.w_title, "Note not found");
-            v.setTextViewText(R.id.w_preview, "It may have been deleted. Long-press the widget to pick another.");
+            if (list == null) {
+                v.setTextViewText(R.id.w_kind, "RONGO");
+                v.setTextViewText(R.id.w_when, "");
+                v.setTextViewText(R.id.w_title, "Open Rongo");
+                v.setTextViewText(R.id.w_preview, "Your notes appear here after the app has synced once.");
+            } else {
+                v.setTextViewText(R.id.w_kind, "RONGO");
+                v.setTextViewText(R.id.w_when, "");
+                v.setTextViewText(R.id.w_title, "No notes yet");
+                v.setTextViewText(R.id.w_preview, "Create a note in Rongo and it appears here.");
+            }
         } else {
             v.setTextViewText(R.id.w_kind, kindLabel(n));
             v.setTextViewText(R.id.w_when, n.optString("w", ""));
             v.setTextViewText(R.id.w_title, n.optString("t", "Untitled"));
             v.setTextViewText(R.id.w_preview, n.optString("p", ""));
+            open.putExtra("openNote", n.optString("id"));
         }
-
-        // tapping the note opens it in Rongo
-        Intent open = new Intent(ctx, MainActivity.class);
-        open.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        open.putExtra("openNote", noteId);
+        // a tap opens the note (or the app)
         v.setOnClickPendingIntent(R.id.w_root, PendingIntent.getActivity(ctx, widgetId, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
         mgr.updateAppWidget(widgetId, v);
-    }
-
-    static void setTextColors(RemoteViews v, int color) {
-        v.setTextColor(R.id.w_kind, color);
-        v.setTextColor(R.id.w_when, color);
-        v.setTextColor(R.id.w_title, color);
-        v.setTextColor(R.id.w_preview, color);
     }
 }

@@ -3,6 +3,19 @@
 Colorful notes, checklists, spreadsheet tables, reminders (real Android notifications),
 calendar, clock, focus timer and priorities. Your data stays on the phone.
 
+## Get the APK (about 10 minutes, no Android Studio)
+
+1. Create a free account at github.com and make a new repository (private is fine).
+2. Upload everything in this folder to it. On the repo page choose Add file > Upload files
+   and drag the contents in. Make sure the hidden `.github` folder is included
+   (it holds `workflows/build-apk.yml`).
+3. Open the Actions tab. The "Build Rongo APK" run starts by itself (or press Run workflow).
+   It takes about 5 minutes.
+4. When it turns green, open the repo's Releases section (right side of the repo page),
+   open "Rongo APK", and tap `Rongo.apk` to download it on your phone.
+5. Open the file. Android asks to allow installs from your browser: allow it, then Install.
+   (Play Protect may warn about an unknown app. This is your own build: choose Install anyway.)
+
 ## First launch
 
 - Allow notifications when asked.
@@ -10,6 +23,13 @@ calendar, clock, focus timer and priorities. Your data stays on the phone.
   may take you to an "Alarms and reminders" screen: switch it on so reminders fire on time.
 - On some phones (Xiaomi, Oppo, Vivo, Samsung) also set battery use for Rongo to
   "Unrestricted" so the system does not delay reminders.
+
+## What is new in 1.6.0
+
+- Widgets fill in automatically with your most important notes, and update when your notes change. Each widget shows a different note.
+- Widget look (Glass, Night, Priority, Minimal) and which notes they use (top notes or pinned only) are set in Settings.
+- Notes is in the middle of the bottom bar with smaller labels. Settings is at the far right.
+- The build stops with a clear message when signing secrets are missing, and prints the key fingerprint so you can check it.
 
 ## What is new in 1.5.0
 

@@ -330,16 +330,21 @@ body{background-attachment:fixed}
 .pw-l time{font-family:var(--f-clock);font-size:12px;font-weight:500;opacity:.75}
 .pw-e{margin:12px 0 0;font-size:13px;opacity:.7}
 
-/* navigation: Notes in the middle and noticeable, Settings beside it */
+/* navigation: a soft glass bar; Notes is raised in the middle */
 .nv-set{display:none}
-.nv[data-v=notes]{font-weight:800}
+@media (min-width:761px){.nv[data-v=notes]{order:-1}.nv[data-v=search]{display:none}}
 @media (max-width:760px){
+  #app{padding-bottom:124px}
+  .side{left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom,0px));border-radius:30px;padding:8px 10px;align-items:center;background:rgba(255,255,255,.52);-webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);border:1px solid rgba(255,255,255,.78);box-shadow:0 22px 44px -16px rgba(60,40,140,.36),inset 0 1px 0 rgba(255,255,255,.85)}
+  #nav{align-items:center;gap:2px;width:100%}
+  .nv{flex-direction:column;gap:3px;padding:7px 2px 6px;font-size:10.5px;font-weight:600;letter-spacing:.01em;border-radius:20px;color:#6C6684;width:auto;flex:1;align-items:center;transition:background .25s,color .25s}
+  .nv svg{width:20px;height:20px}
+  .nv[aria-current="page"]{background:rgba(143,126,255,.16);color:#4B3AB8}
+  .nv[data-v=tables]{order:1}.nv[data-v=calendar]{order:2}.nv[data-v=notes]{order:3}.nv[data-v=today]{order:4}.nv-set{order:5}
+  .nv[data-v=notes]{flex:0 0 auto;width:64px;height:56px;justify-content:center;padding:0;margin:-16px 4px 0;border-radius:20px;color:#5B3FE0;font-size:10px;font-weight:700;background:linear-gradient(160deg,#F7F4FF,#E2D9FF);box-shadow:0 10px 22px -12px rgba(107,78,255,.5),inset 0 1px 0 rgba(255,255,255,.95)}
+  .nv[data-v=notes] svg{width:22px;height:22px}
+  .nv[data-v=notes][aria-current="page"]{color:#fff;background:linear-gradient(160deg,#A592FF,#7C62FF);box-shadow:0 10px 22px -12px rgba(107,78,255,.6),inset 0 1px 0 rgba(255,255,255,.4)}
   .nv-set{display:flex}
-  .nv[data-v=tables]{order:1}.nv[data-v=calendar]{order:2}.nv[data-v=notes]{order:3}.nv-set{order:4}.nv[data-v=today]{order:5}
-  .nv[data-v=notes]{flex:1.3;padding:9px 4px;border-radius:20px;color:#fff;background:linear-gradient(155deg,#9785ff 0%,#6B4EFF 52%,#4a2fe0 100%);box-shadow:0 14px 28px -10px rgba(107,78,255,.75),inset 0 1px 0 rgba(255,255,255,.45);transform:translateY(-10px)}
-  .nv[data-v=notes] svg{width:24px;height:24px}
-  .nv[data-v=notes] span{font-size:12px}
-  .nv[data-v=notes][aria-current="page"]{background:linear-gradient(155deg,#9785ff 0%,#6B4EFF 52%,#4a2fe0 100%)}
 }
 /* eye-catching colored buttons */
 .bn{position:relative;overflow:hidden;font-weight:800;padding:11px 18px;border:1px solid rgba(255,255,255,.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.75),inset 0 -6px 12px -8px rgba(20,8,60,.25),0 12px 26px -12px rgba(40,20,110,.55);transition:transform .15s,box-shadow .15s}
@@ -413,7 +418,7 @@ body{background-attachment:fixed}
       <label class="search"><svg class="i"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Search notes, lists, labels  ( / )" autocomplete="off"></label>
       <div class="chipclock" id="chip" aria-live="off"><b>--:--</b><span>&nbsp;</span></div>
       <button class="ib" data-act="theme" id="themebtn" aria-label="Switch light or dark theme"><svg class="i"><use href="#i-moon"/></svg></button>
-      <button class="ib hide-m" data-act="settings" aria-label="Settings"><svg class="i"><use href="#i-gear"/></svg></button>
+      <button class="ib" data-act="settings" id="gearbtn" aria-label="Settings"><svg class="i"><use href="#i-gear"/></svg></button>
     </header>
     <main id="main"></main>
   </div>
@@ -476,7 +481,7 @@ function seed(){
 }
 function normalize(o){
   if(!o||!Array.isArray(o.items))return null;
-  o.settings=Object.assign({theme:'auto',weekStart:0,h24:false,tz2:'Europe/London',haptics:true},o.settings||{});
+  o.settings=Object.assign({theme:'auto',weekStart:0,h24:false,tz2:'Europe/London',haptics:true,widgetLook:'glass',widgetSource:'auto'},o.settings||{});
   o.items.forEach(function(it){it.labels=it.labels||[];it.list=it.list||[];if(COLORS.indexOf(it.color)<0)it.color='snow';it.priority=it.priority|0});
   o.updated=o.updated||0; return o;
 }
@@ -488,16 +493,21 @@ function widgetPreview(it){
   if(it.type==='table'){return it.table.rows.length+' × '+(it.table.rows[0]?it.table.rows[0].length:0)+' table'}
   return (it.body||'').replace(/\s+/g,' ').trim().slice(0,180);
 }
+/* notes in the order the widgets show them: pinned, then priority, then upcoming reminders, then most recent */
 function widgetNotes(){
-  return S.items.filter(function(it){return !it.trashed}).map(function(it){
-    return {id:it.id,t:it.title||'Untitled',p:widgetPreview(it),c:it.color||'snow',k:it.type,pr:it.priority|0,w:(it.remind&&!it.remind.done)?whenText(it.remind.at).replace(/^Today, /,''):'',a:it.archived?1:0};
+  var list=S.items.filter(function(it){return !it.trashed&&!it.archived});
+  var rem=function(it){return it.remind&&!it.remind.done?it.remind.at:9e15};
+  list.sort(function(a,b){return ((b.pinned?1:0)-(a.pinned?1:0))||((b.priority|0)-(a.priority|0))||(rem(a)-rem(b))||(b.updated-a.updated)});
+  if(S.settings.widgetSource==='pinned'){var pn=list.filter(function(x){return x.pinned});if(pn.length)list=pn}
+  return list.slice(0,12).map(function(it){
+    return {id:it.id,t:it.title||'Untitled',p:widgetPreview(it),c:it.color||'snow',k:it.type,pr:it.priority|0,w:(it.remind&&!it.remind.done)?whenText(it.remind.at).replace(/^Today, /,''):''};
   });
 }
 function nativeRC(){return window.Capacitor&&window.Capacitor.Plugins&&window.Capacitor.Plugins.RongoChannels}
 /* sends the note list to the Android widgets; now=true sends at once, otherwise after a short pause so typing does not flood it */
 function syncWidget(now){
   var RC=nativeRC();if(!RC||!RC.saveWidget||!S)return;
-  var go=function(){try{RC.saveWidget({notes:JSON.stringify(widgetNotes())}).catch(function(){})}catch(e){}};
+  var go=function(){try{RC.saveWidget({notes:JSON.stringify(widgetNotes()),look:S.settings.widgetLook||'glass'}).catch(function(){})}catch(e){}};
   clearTimeout(widgetTimer);
   if(now)go();else widgetTimer=setTimeout(go,1200);
 }
@@ -833,7 +843,7 @@ function agiFull(it){
 }
 function renderNav(){
   var tr=S.items.filter(function(i){return i.trashed}).length;
-  var tabs=[['notes','Notes','notes'],['tables','Tables','table'],['calendar','Calendar','cal'],['today','Today','clock']];
+  var tabs=[['tables','Tables','table'],['calendar','Calendar','cal'],['notes','Notes','notes'],['today','Today','clock']];
   $('#nav').innerHTML=tabs.map(function(t){return '<button class="nv" data-act="nav" data-v="'+t[0]+'"'+(view===t[0]?' aria-current="page"':'')+'>'+ic(t[2])+'<span>'+t[1]+'</span></button>'}).join('')+
     '<button class="nv nv-set" data-act="settings" aria-label="Settings">'+ic('gear')+'<span>Settings</span></button>';
 }
@@ -998,7 +1008,9 @@ function renderSettings(){
   '<div class="settings-row"><div><b>Test alert</b><div class="date" style="font-size:13px">Plays the Urgent sound and vibrates. Use it to check your phone works.</div></div><button class="btn sm" data-act="vtest">Test</button></div>'+
   '<div class="settings-row"><div><b>Tap vibration</b><div class="date" style="font-size:13px">A short buzz when you press buttons, tick items or confirm.</div></div><div class="row"><button class="seg" data-act="shap" data-v="1" aria-pressed="'+(s.haptics!==false)+'">On</button><button class="seg" data-act="shap" data-v="0" aria-pressed="'+(s.haptics===false)+'">Off</button></div></div>'+
   '<div class="settings-row"><div><b>Archive and trash</b><div class="date" style="font-size:13px">Notes you archived or deleted.</div></div><div class="row"><button class="btn sm" data-act="sgo" data-v="archive">Archive</button><button class="btn sm" data-act="sgo" data-v="trash">Trash'+(S.items.filter(function(i){return i.trashed}).length?' ('+S.items.filter(function(i){return i.trashed}).length+')':'')+'</button></div></div>'+
-  '<div class="settings-row"><div><b>Home-screen widgets</b><div class="date" style="font-size:13px">Long-press your home screen, choose Rongo, then pick a note and a look. Add more widgets for more notes.</div></div></div>'+
+  '<div class="settings-row"><div><b>Home-screen widgets</b><div class="date" style="font-size:13px">Add Rongo to your home screen. It fills in by itself with your top notes, and each widget shows a different one.</div></div></div>'+
+  '<div class="settings-row"><b>Widget look</b><div class="row">'+seg('swl','widgetLook','glass','Glass')+seg('swl','widgetLook','night','Night')+seg('swl','widgetLook','priority','Priority')+seg('swl','widgetLook','minimal','Minimal')+'</div></div>'+
+  '<div class="settings-row"><b>Widget notes</b><div class="row">'+seg('wsrc','widgetSource','auto','Top notes')+seg('wsrc','widgetSource','pinned','Pinned only')+'</div></div>'+
   '<div class="settings-row"><b>Backup</b><div class="date" style="font-size:13px">Save everything to a file, or add notes from a backup.</div></div><div class="row"><button class="btn sm" data-act="sexport" id="expbtn">'+ic('down','sm')+'Export</button><label class="btn sm" for="imp">Import</label><input type="file" id="imp" accept=".json,application/json" hidden></div></div>'+
   '<div class="settings-row"><div><b>Examples</b><div class="date" style="font-size:13px">Add the sample cards again.</div></div><button class="btn sm" data-act="sseed">Add examples</button></div>'+
   '<div class="settings-row"><div><b>Erase everything</b><div class="date" style="font-size:13px">Deletes all notes on this device and your account copy.</div></div><button class="btn sm danger" data-act="swipe" id="wipe">Erase all</button></div>'+
@@ -1009,6 +1021,9 @@ function renderSettings(){
 function openById(id){var it=byId(id);if(it)openEditor(it,false)}
 var A={
   nav:function(el){view=el.dataset.v;$('#q').value=filter.q;render();window.scrollTo(0,0)},
+  swl:function(el){S.settings.widgetLook=el.dataset.v;save();renderSettings();syncWidget(true)},
+  wsrc:function(el){S.settings.widgetSource=el.dataset.v;save();renderSettings();syncWidget(true)},
+  focusq:function(){window.scrollTo(0,0);var q=$('#q');if(q){q.focus();q.select&&q.select()}},
   sgo:function(el){closeModal();view=el.dataset.v;$('#q').value=filter.q;render();window.scrollTo(0,0)},
   theme:function(){var o=['auto','light','dark'];S.settings.theme=o[(o.indexOf(S.settings.theme)+1)%3];applyTheme();save();toast('Theme: '+S.settings.theme)},
   settings:function(){openSettings()},
@@ -1184,12 +1199,12 @@ document.addEventListener('keydown',function(e){
 document.addEventListener('visibilitychange',function(){if(!document.hidden){checkReminders();tick();checkPendingOpen()}});
 
 /* ---------- one-time window after install or update ---------- */
-var WHATS_NEW='1.5';
+var WHATS_NEW='1.6';
 var WN_ITEMS=[
-  'Home-screen widgets now show the note you choose. Add a widget, pick a note and a look: Glass, Night, Priority or Minimal.',
-  'Add as many widgets as you like. Each one can show a different note, and you can change the look any time.',
-  'Notes is now in the middle of the bottom bar, with Settings beside it.',
-  'Archive and Trash moved into Settings.'
+  'Widgets fill in automatically with your most important notes, and update when your notes change.',
+  'Widget look and which notes it uses are set in Settings.',
+  'Smaller navigation labels. Notes sits in the middle and Settings is at the far right.',
+  'Updates install over the previous version without uninstalling.'
 ];
 function showWhatsNew(){
   var seen=null;try{seen=localStorage.getItem('rongo.whatsnew')}catch(e){}
